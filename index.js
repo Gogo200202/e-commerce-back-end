@@ -1,18 +1,34 @@
-const { MongoClient } = require("mongodb");
-// Replace the uri string with your connection string
-const uri = "mongodb://localhost:27017";
-const client = new MongoClient(uri);
-async function run() {
-  try {
-    const database = client.db('Test');
-    const movies =  database.collection('User');
-    // Queries for a movie that has a title value of 'Back to the Future'
+var cors = require("cors");
+const express = require("express");
+const app = express();
+const port = 8080;
 
-    const movie = await movies.find({}).toArray();
-    console.log(movie);
-  } finally {
-    await client.close();
-  }
-}
+app.use(express.json());
+app.use(cors());
 
-run().catch(console.dir);
+const { GetAllItems, GetItemById } = require("./database/ItemsQuery");
+
+app.get("/", async function (req, res) {
+  res.json({ Message: "not here" });
+});
+
+app.get("/getAllItems", async function (req, res, next) {
+  let allItems = await GetAllItems();
+
+  res.json({ Items: allItems });
+});
+
+app.post("/getById", async function (req, res) {
+  console.log(req.body);
+
+  let id = req.body._id;
+
+  let item = await GetItemById(id);
+
+  res.json({ item });
+});
+
+app.listen(port, function (err) {
+  if (err) console.log(err);
+  console.log("Server listening on PORT", port);
+});
