@@ -70,6 +70,7 @@ function AddImgToDb(req, res, next) {
     name: body.Name,
     description: body.Description,
     phone: body.PhoneNumber,
+    price: body.Price,
   };
   addItems(item);
   next();
