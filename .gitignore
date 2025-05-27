@@ -1,2 +1,3 @@
 node_modules
 imgHost/public/images
+.env
