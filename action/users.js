@@ -2,48 +2,24 @@ const dotenv = require("dotenv");
 dotenv.config();
 const jwt = require("jsonwebtoken");
 const { Router } = require("express");
+const {
+  generateTokenMiddleware,
+  validateTokenMiddleware,
+} = require("../middleware/jwt");
 
 const router = Router();
 
-
-
-router.post("/user/generateToken", (req, res) => {
-    // Validate User Here
-    // Then generate JWT Token
-
-    let jwtSecretKey = process.env.JWT_SECRET_KEY;
-    let data = {
-        time: Date(),
-        userId: 12,
-    }
-
-    const token = jwt.sign(data, jwtSecretKey);
-
-    res.send(token);
+router.post("/user/CreateUser", generateTokenMiddleware, (req, res) => {
+  res.json({ User: "Create", Jwt: res.locals.jwt });
 });
 
-router.get("/user/validateToken", (req, res) => {
-    // Tokens are generally passed in header of request
-    // Due to security reasons.
+router.post("/user/login", validateTokenMiddleware, (req, res) => {
 
-    let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
-    let jwtSecretKey = process.env.JWT_SECRET_KEY;
-
-    try {
-      
-        const token = req.header(tokenHeaderKey);
-
-        const verified = jwt.verify(token, jwtSecretKey);
-        if (verified) {
-            return res.send("Successfully Verified");
-        } else {
-            // Access Denied
-            return res.status(401).send(error);
-        }
-    } catch (error) {
-        // Access Denied
-        return res.status(401).send(error);
-    }
+  if (res.locals.jwtValid) {
+    res.json({ User: "login" });
+  } else {
+    res.json({ User: "not login" });
+  }
 });
 
 module.exports = router;
