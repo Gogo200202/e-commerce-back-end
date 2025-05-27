@@ -3,39 +3,31 @@ dotenv.config();
 const jwt = require("jsonwebtoken");
 const { Router } = require("express");
 
-
-
-function generateTokenMiddleware(req, res, next) {
+function generateTokenFunction(userName, userId) {
   let jwtSecretKey = process.env.JWT_SECRET_KEY;
   let data = {
     time: Date(),
-    userId: 12,
+    userId: userId,
   };
 
   const token = jwt.sign(data, jwtSecretKey);
-  res.locals.jwt = token;
-  next();
+  return token;
 }
 
-function validateTokenMiddleware(req, res, next) {
-  let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+function validateTokenFunction(token) {
   let jwtSecretKey = process.env.JWT_SECRET_KEY;
-  res.locals.jwtValid = true;
-  try {
-    const token = req.header(tokenHeaderKey);
 
+  try {
     const verified = jwt.verify(token, jwtSecretKey);
     if (verified) {
-      res.locals.jwtValid = true;
+      return true;
     } else {
       // Access Denied
-      res.locals.jwtValid = false;
+      return false;
     }
   } catch (error) {
     // Access Denied
-    res.locals.jwtValid = false;
+    return false;
   }
-  next();
 }
-
-module.exports = { generateTokenMiddleware, validateTokenMiddleware};
+module.exports = { generateTokenFunction, validateTokenFunction };

@@ -6,9 +6,11 @@ async function startDb() {
   
     const database =  client.db('eCommerceDb');
     const Items =   database.collection('Items');
+    const Users= database.collection('Users');
     let object={
         "db":database,
-        "Items":Items
+        "Items":Items,
+        "Users":Users
     }
    
     return object;
