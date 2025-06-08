@@ -1,21 +1,15 @@
 const { validateTokenFunction } = require("./jwt");
-const { getProductsFromUser } = require("../database/user");
+const { checkIfItemBelowsToUser,checkIfItemIsLikedByUser } = require("../database/user");
 
 async function checkIfItemBelongsToUser(token, id) {
   let getUser = validateTokenFunction(token);
   let result = false;
   if (getUser) {
-    let getUserItems = await getProductsFromUser(getUser.userName);
-
-    for (
-      let index = 0;
-      index < getUserItems.publishedProducts.length;
-      index++
-    ) {
-      if (getUserItems.publishedProducts[index] == id) {
-        result = true;
-        break;
-      }
+    let isThisTheOwner = await checkIfItemBelowsToUser(getUser.userName, id);
+    if (isThisTheOwner == 1) {
+      result = true;
+    } else {
+      result = false;
     }
   } else {
     result = false;
@@ -23,4 +17,21 @@ async function checkIfItemBelongsToUser(token, id) {
 
   return result;
 }
-module.exports = { checkIfItemBelongsToUser };
+
+async function checkIfItemIsLedByUser(token, id) {
+  let getUser = validateTokenFunction(token);
+  let result = false;
+  if (getUser) {
+    let isThisTheOwner = await checkIfItemIsLikedByUser(getUser.userName, id);
+    if (isThisTheOwner == 1) {
+      result = true;
+    } else {
+      result = false;
+    }
+  } else {
+    result = false;
+  }
+
+  return result;
+}
+module.exports = { checkIfItemBelongsToUser,checkIfItemIsLedByUser };

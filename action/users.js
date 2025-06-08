@@ -7,13 +7,19 @@ const {
   CreateUser,
   fiendByUserName,
   getProductsFromUser,
+  addProductLikesToUser,
+  deleteProductIdFromUser,
+  deleteLikedProductIdFromUser,
 } = require("../database/user");
 const { generateTokenFunction } = require("../utils/jwt");
 const { hashPassword, checkPassword } = require("../utils/hashPasswords");
 const { validateTokenMiddleware } = require("../middleware/jwt");
 const { validateTokenFunction } = require("../utils/jwt");
 const { deleteItemById } = require("../database/ItemsQuery");
-const { checkIfItemBelongsToUser } = require("../utils/user");
+const {
+  checkIfItemBelongsToUser,
+  checkIfItemIsLedByUser,
+} = require("../utils/user");
 
 const router = Router();
 
@@ -82,9 +88,14 @@ router.post("/user/deleteItem", validateTokenMiddleware, async (req, res) => {
     const token = req.header(tokenHeaderKey);
 
     let result = await checkIfItemBelongsToUser(token, id);
-    console.log(id);
+
     if (result) {
       let item = deleteItemById(id);
+
+      let deleteItemFromUser = deleteProductIdFromUser(
+        res.locals.userData.userName,
+        id
+      );
       res.json({ massage: "Item deleted" });
     } else {
       res.json({ message: "not user" });
@@ -93,4 +104,64 @@ router.post("/user/deleteItem", validateTokenMiddleware, async (req, res) => {
     res.json({ message: "not validToken" });
   }
 });
+
+router.post(
+  "/user/userLikedItem",
+  validateTokenMiddleware,
+  async (req, res) => {
+    let id = req.body["_id"];
+    if (res.locals.jwtValid) {
+      let result = addProductLikesToUser(res.locals.userData.userName, id);
+
+      if (result != null) {
+        res.status(200).json({ massage: "user Lied product" });
+      } else {
+        res.status(401).json({ massage: "not valid User" });
+      }
+    } else {
+      res.status(401).json({ massage: "not valid token" });
+    }
+  }
+);
+
+router.post(
+  "/user/userDisLikedItem",
+  validateTokenMiddleware,
+  async (req, res) => {
+    let id = req.body["_id"];
+    if (res.locals.jwtValid) {
+      let result = deleteLikedProductIdFromUser(
+        res.locals.userData.userName,
+        id
+      );
+
+      if (result != null) {
+        res.status(200).json({ massage: "user disLied product" });
+      } else {
+        res.status(401).json({ massage: "not valid User" });
+      }
+    } else {
+      res.status(401).json({ massage: "not valid token" });
+    }
+  }
+);
+
+router.post(
+  "/user/checkIfUserLikedThisItem",
+  validateTokenMiddleware,
+  async (req, res) => {
+    let id = req.body["_id"];
+    if (res.locals.jwtValid) {
+      let result = checkIfItemIsLedByUser(res.locals.userData.userName, id);
+
+      if (result == 1) {
+        res.status(200).json({ IsItLiked: true });
+      } else {
+        res.status(401).json({ IsItLiked: false });
+      }
+    } else {
+      res.status(401).json({ IsItLiked: false });
+    }
+  }
+);
 module.exports = router;
