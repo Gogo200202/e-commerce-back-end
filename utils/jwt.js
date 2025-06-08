@@ -20,12 +20,7 @@ function validateTokenFunction(token) {
 
   try {
     const verified = jwt.verify(token, jwtSecretKey);
-    if (verified) {
-      return true;
-    } else {
-      // Access Denied
-      return false;
-    }
+   return verified;
   } catch (error) {
     // Access Denied
     return false;

@@ -3,10 +3,15 @@ dotenv.config();
 const jwt = require("jsonwebtoken");
 const { Router, request } = require("express");
 
-const { CreateUser, fiendByUserName,getProductsFromUser } = require("../database/user");
+const {
+  CreateUser,
+  fiendByUserName,
+  getProductsFromUser,
+} = require("../database/user");
 const { generateTokenFunction } = require("../utils/jwt");
 const { hashPassword, checkPassword } = require("../utils/hashPasswords");
-const{validateTokenMiddleware} =require("../middleware/jwt")
+const { validateTokenMiddleware } = require("../middleware/jwt");
+const { validateTokenFunction } = require("../utils/jwt");
 
 const router = Router();
 
@@ -20,7 +25,6 @@ router.post("/user/CreateUser", async (req, res) => {
   let user = await fiendByUserName(body.userName);
 
   if (user == null) {
-    
     let newUser = await CreateUser(body);
     let jwt = generateTokenFunction(body["userName"], newUser.insertedId);
     res.status(200).json({ Jwt: jwt });
@@ -44,16 +48,41 @@ router.post("/user/login", async (req, res) => {
   }
 });
 
-router.get("/user/getItems",validateTokenMiddleware, async (req, res) => {
-  if(res.locals.jwtValid){
- let items= await getProductsFromUser(res.locals.userData.userName)
+router.get("/user/getItems", validateTokenMiddleware, async (req, res) => {
+  if (res.locals.jwtValid) {
+    let items = await getProductsFromUser(res.locals.userData.userName);
 
- res.json(items)
-  }else{
-     res.json({"message":"not validToken"})
+    res.json(items);
+  } else {
+    res.json({ message: "not validToken" });
   }
- 
-
 });
 
+router.post("/user/checkIfItemBelongsToUser", async (req, res) => {
+  let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+  const token = req.header(tokenHeaderKey);
+  let getUser = validateTokenFunction(token);
+  let body = req.body;
+
+  if (getUser) {
+    
+    let getUserItems = await getProductsFromUser(getUser.userName);
+
+    let result = false;
+    for (
+      let index = 0;
+      index < getUserItems.publishedProducts.length;
+      index++
+    ) {
+    
+      if (getUserItems.publishedProducts[index] == body["_id"]) {
+        result = true;
+        break;
+      }
+    }
+    res.status(200).json({ IsYours: result });
+  } else {
+    res.status(401).json({ message: "not logged in" });
+  }
+});
 module.exports = router;

@@ -22,7 +22,7 @@ router.get("/getAllItems", async function (req, res, next) {
 
 router.post("/getById", async function (req, res) {
   let id = req.body._id;
-  console.log(id);
+
 
   let item = await GetItemById(id);
 
