@@ -12,6 +12,8 @@ const { generateTokenFunction } = require("../utils/jwt");
 const { hashPassword, checkPassword } = require("../utils/hashPasswords");
 const { validateTokenMiddleware } = require("../middleware/jwt");
 const { validateTokenFunction } = require("../utils/jwt");
+const { deleteItemById } = require("../database/ItemsQuery");
+const { checkIfItemBelongsToUser } = require("../utils/user");
 
 const router = Router();
 
@@ -61,28 +63,34 @@ router.get("/user/getItems", validateTokenMiddleware, async (req, res) => {
 router.post("/user/checkIfItemBelongsToUser", async (req, res) => {
   let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
   const token = req.header(tokenHeaderKey);
-  let getUser = validateTokenFunction(token);
   let body = req.body;
+  let id = body["_id"];
+  let result = await checkIfItemBelongsToUser(token, id);
 
-  if (getUser) {
-    
-    let getUserItems = await getProductsFromUser(getUser.userName);
-
-    let result = false;
-    for (
-      let index = 0;
-      index < getUserItems.publishedProducts.length;
-      index++
-    ) {
-    
-      if (getUserItems.publishedProducts[index] == body["_id"]) {
-        result = true;
-        break;
-      }
-    }
+  if (result) {
     res.status(200).json({ IsYours: result });
   } else {
     res.status(401).json({ message: "not logged in" });
+  }
+});
+
+router.post("/user/deleteItem", validateTokenMiddleware, async (req, res) => {
+  let id = req.body["_id"];
+
+  if (res.locals.jwtValid) {
+    let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+    const token = req.header(tokenHeaderKey);
+
+    let result = await checkIfItemBelongsToUser(token, id);
+    console.log(id);
+    if (result) {
+      let item = deleteItemById(id);
+      res.json({ massage: "Item deleted" });
+    } else {
+      res.json({ message: "not user" });
+    }
+  } else {
+    res.json({ message: "not validToken" });
   }
 });
 module.exports = router;

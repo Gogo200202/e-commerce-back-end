@@ -28,10 +28,20 @@ async function GetItemsByName(name) {
     name: new RegExp(name, "i"),
   };
 
-
   const Items = await DbConnection.Items.find(obj).toArray();
 
   return Items;
 }
 
-module.exports = { GetAllItems, GetItemById, GetItemsByName };
+async function deleteItemById(id) {
+  let DbConnection = await Db;
+
+  const filter = {
+    _id: new mongo.ObjectId(id),
+  };
+
+  const Items = await DbConnection.Items.deleteOne(filter );
+  console.log(filter);
+  return Items;
+}
+module.exports = { GetAllItems, GetItemById, GetItemsByName, deleteItemById };
