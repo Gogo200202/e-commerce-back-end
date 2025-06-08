@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-
+const { validateTokenMiddleware } = require("../middleware/jwt");
 const { Router } = require("express");
 
 const router = Router();
@@ -12,7 +12,7 @@ const {
   GetItemsByName,
 } = require("../database/ItemsQuery");
 const { addItems } = require("../database/Items");
-const { request } = require("http");
+const { addProductToUserPublished } = require("../database/user");
 
 router.get("/getAllItems", async function (req, res, next) {
   let allItems = await GetAllItems();
@@ -22,6 +22,7 @@ router.get("/getAllItems", async function (req, res, next) {
 
 router.post("/getById", async function (req, res) {
   let id = req.body._id;
+  console.log(id);
 
   let item = await GetItemById(id);
 
@@ -54,7 +55,7 @@ let storage = multer.diskStorage({
 });
 
 let upload = multer({ storage: storage });
-function AddImgToDb(req, res, next) {
+async function AddImgToDb(req, res, next) {
   let PhatToImg = "http://localhost:5353/images/" + req.uuid + "." + req.type;
   let body = req.body;
 
@@ -65,16 +66,23 @@ function AddImgToDb(req, res, next) {
     phone: body.PhoneNumber,
     price: body.Price,
   };
-  addItems(item);
+
+  if (res.locals.jwtValid) {
+    res.status(200);
+    let newItem = await addItems(item);
+
+    await addProductToUserPublished(res.locals.userData.userName, newItem.insertedId.toHexString());
+  }
+
   next();
 }
 
 router.post(
   "/addItem",
   upload.single("file"),
-  AddImgToDb,
+  [validateTokenMiddleware, AddImgToDb],
   async function (req, res) {
-    res.status(201).send({ status: "recieved" });
+    res.status(200).send({ status: "recieved" });
   }
 );
 

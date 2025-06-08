@@ -8,6 +8,7 @@ function generateTokenFunction(userName, userId) {
   let data = {
     time: Date(),
     userId: userId,
+    userName:userName
   };
 
   const token = jwt.sign(data, jwtSecretKey);

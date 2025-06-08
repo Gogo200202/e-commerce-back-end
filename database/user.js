@@ -20,6 +20,30 @@ async function CreateUser(newUser) {
   return user;
 }
 
+async function addProductToUserPublished(userName,productId) {
+  let DbConnection = await Db;
+
+  const user = await DbConnection.Users.updateOne({"userName":userName},{$push:{publishedProducts:productId}});
+
+  return user;
+}
+
+async function getProductsFromUser(userName) {
+  let DbConnection = await Db;
+   
+  const filter = {
+  'userName': userName
+};
+const projection = {
+  'publishedProducts': 1, 
+  '_id': 0
+};
+  const userItems = await DbConnection.Users.findOne(filter, { projection });
+
+  return userItems;
+}
+
+
 
 async function fiendByUserName(userName) {
   let DbConnection = await Db;
@@ -29,4 +53,4 @@ async function fiendByUserName(userName) {
   return user;
 }
 
-module.exports = { CreateUser,fiendByUserName };
+module.exports = { CreateUser,fiendByUserName,addProductToUserPublished ,getProductsFromUser};

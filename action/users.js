@@ -3,9 +3,10 @@ dotenv.config();
 const jwt = require("jsonwebtoken");
 const { Router, request } = require("express");
 
-const { CreateUser, fiendByUserName } = require("../database/user");
+const { CreateUser, fiendByUserName,getProductsFromUser } = require("../database/user");
 const { generateTokenFunction } = require("../utils/jwt");
 const { hashPassword, checkPassword } = require("../utils/hashPasswords");
+const{validateTokenMiddleware} =require("../middleware/jwt")
 
 const router = Router();
 
@@ -41,6 +42,18 @@ router.post("/user/login", async (req, res) => {
   } else {
     res.status(401).json({ Message: "not valid password or user name" });
   }
+});
+
+router.get("/user/getItems",validateTokenMiddleware, async (req, res) => {
+  if(res.locals.jwtValid){
+ let items= await getProductsFromUser(res.locals.userData.userName)
+
+ res.json(items)
+  }else{
+     res.json({"message":"not validToken"})
+  }
+ 
+
 });
 
 module.exports = router;
