@@ -81,6 +81,7 @@ async function checkIfItemIsLikedByUser(userName, productId) {
     likedProducts: { $in: [productId] },
   }).count();
 
+
   return user;
 }
 
@@ -105,6 +106,20 @@ async function addProductLikesToUser(userName, productId) {
 
   return user;
 }
+async function getLikedProductsFromUser(userName) {
+  let DbConnection = await Db;
+
+  const filter = {
+    userName: userName,
+  };
+  const projection = {
+    likedProducts: 1,
+    _id: 0,
+  };
+  const userItems = await DbConnection.Users.findOne(filter, { projection });
+
+  return userItems;
+}
 
 module.exports = {
   CreateUser,
@@ -115,5 +130,6 @@ module.exports = {
   deleteProductIdFromUser,
   deleteLikedProductIdFromUser,
   checkIfItemBelowsToUser,
-  checkIfItemIsLikedByUser
+  checkIfItemIsLikedByUser,
+  getLikedProductsFromUser
 };

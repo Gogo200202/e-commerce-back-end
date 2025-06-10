@@ -1,5 +1,8 @@
 const { validateTokenFunction } = require("./jwt");
-const { checkIfItemBelowsToUser,checkIfItemIsLikedByUser } = require("../database/user");
+const {
+  checkIfItemBelowsToUser,
+  checkIfItemIsLikedByUser,
+} = require("../database/user");
 
 async function checkIfItemBelongsToUser(token, id) {
   let getUser = validateTokenFunction(token);
@@ -23,6 +26,7 @@ async function checkIfItemIsLedByUser(token, id) {
   let result = false;
   if (getUser) {
     let isThisTheOwner = await checkIfItemIsLikedByUser(getUser.userName, id);
+
     if (isThisTheOwner == 1) {
       result = true;
     } else {
@@ -34,4 +38,4 @@ async function checkIfItemIsLedByUser(token, id) {
 
   return result;
 }
-module.exports = { checkIfItemBelongsToUser,checkIfItemIsLedByUser };
+module.exports = { checkIfItemBelongsToUser, checkIfItemIsLedByUser };

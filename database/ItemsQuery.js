@@ -40,8 +40,22 @@ async function deleteItemById(id) {
     _id: new mongo.ObjectId(id),
   };
 
-  const Items = await DbConnection.Items.deleteOne(filter );
-  console.log(filter);
+  const Items = await DbConnection.Items.deleteOne(filter);
+
   return Items;
 }
-module.exports = { GetAllItems, GetItemById, GetItemsByName, deleteItemById };
+
+async function addItems(item) {
+  let DbConnection = await Db;
+
+  const Items = await DbConnection.Items.insertOne(item);
+
+  return Items;
+}
+module.exports = {
+  GetAllItems,
+  GetItemById,
+  GetItemsByName,
+  deleteItemById,
+  addItems,
+};

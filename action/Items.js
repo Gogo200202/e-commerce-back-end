@@ -11,7 +11,7 @@ const {
   GetItemById,
   GetItemsByName,
 } = require("../database/ItemsQuery");
-const { addItems } = require("../database/Items");
+const { addItems } = require("../database/ItemsQuery");
 const { addProductToUserPublished } = require("../database/user");
 
 router.get("/getAllItems", async function (req, res, next) {

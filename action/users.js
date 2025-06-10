@@ -10,6 +10,7 @@ const {
   addProductLikesToUser,
   deleteProductIdFromUser,
   deleteLikedProductIdFromUser,
+  getLikedProductsFromUser,
 } = require("../database/user");
 const { generateTokenFunction } = require("../utils/jwt");
 const { hashPassword, checkPassword } = require("../utils/hashPasswords");
@@ -152,9 +153,12 @@ router.post(
   async (req, res) => {
     let id = req.body["_id"];
     if (res.locals.jwtValid) {
-      let result = checkIfItemIsLedByUser(res.locals.userData.userName, id);
+      let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
+      const token = req.header(tokenHeaderKey);
 
-      if (result == 1) {
+      let result = await checkIfItemIsLedByUser(token, id);
+
+      if (result) {
         res.status(200).json({ IsItLiked: true });
       } else {
         res.status(401).json({ IsItLiked: false });
@@ -164,4 +168,19 @@ router.post(
     }
   }
 );
+
+router.get(
+  "/user/AllLikedItemFrom",
+  validateTokenMiddleware,
+  async (req, res) => {
+    if (res.locals.jwtValid) {
+      let items = await getLikedProductsFromUser(res.locals.userData.userName);
+
+      res.json(items);
+    } else {
+      res.json({ message: "not validToken" });
+    }
+  }
+);
+
 module.exports = router;
