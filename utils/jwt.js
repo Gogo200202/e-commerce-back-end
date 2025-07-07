@@ -1,7 +1,7 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const jwt = require("jsonwebtoken");
-const { Router } = require("express");
+
 
 function generateTokenFunction(userName, userId) {
   let jwtSecretKey = process.env.JWT_SECRET_KEY;
@@ -20,9 +20,10 @@ function validateTokenFunction(token) {
 
   try {
     const verified = jwt.verify(token, jwtSecretKey);
+    
    return verified;
   } catch (error) {
-    // Access Denied
+ 
     return false;
   }
 }

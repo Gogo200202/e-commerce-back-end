@@ -9,7 +9,7 @@ let multer = require("multer");
 const {
   GetAllItems,
   GetItemById,
-  GetItemsByName,
+  getItemsByParams,
 } = require("../database/ItemsQuery");
 const { addItems } = require("../database/ItemsQuery");
 const { addProductToUserPublished } = require("../database/user");
@@ -29,17 +29,17 @@ router.post("/getById", async function (req, res) {
   res.json({ item });
 });
 
-router.post("/getByName", async function (req, res) {
-  let name = req.body.name;
+router.post("/getItemsByParams", async function (req, res) {
+  let body = req.body;
 
-  let items = await GetItemsByName(name);
+  let items = await getItemsByParams(body);
 
   res.json({ items: items });
 });
 
 let storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./imgHost/public/images"); // your path
+    cb(null, "./imgHost/public/images"); 
   },
   filename: function (req, file, cb) {
     const uuid = crypto.randomBytes(16).toString("hex");
@@ -55,6 +55,7 @@ let storage = multer.diskStorage({
 });
 
 let upload = multer({ storage: storage });
+
 async function AddImgToDb(req, res, next) {
   let PhatToImg = "http://localhost:5353/images/" + req.uuid + "." + req.type;
   let body = req.body;
@@ -65,6 +66,9 @@ async function AddImgToDb(req, res, next) {
     description: body.Description,
     phone: body.PhoneNumber,
     price: body.Price,
+    category:body.Category,
+    location:body.Location,
+    totalLikes:0
   };
 
   if (res.locals.jwtValid) {

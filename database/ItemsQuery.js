@@ -21,14 +21,22 @@ async function GetItemById(id) {
   return Item;
 }
 
-async function GetItemsByName(name) {
+async function getItemsByParams(body) {
   let DbConnection = await Db;
 
-  let obj = {
-    name: new RegExp(name, "i"),
-  };
+  const filter = {};
+  if (body.nameOfProduct != '') {
+    filter.name = new RegExp(body.nameOfProduct, "i");
+  }
+  if (body.itemCategory != '') {
+    filter.category = body.itemCategory;
+  }
+  if (body.itemLocation != '') {
+    filter.location = body.itemLocation;
+  }
 
-  const Items = await DbConnection.Items.find(obj).toArray();
+console.log(filter)  
+  const Items = await DbConnection.Items.find(filter).toArray();
 
   return Items;
 }
@@ -55,7 +63,7 @@ async function addItems(item) {
 module.exports = {
   GetAllItems,
   GetItemById,
-  GetItemsByName,
+  getItemsByParams,
   deleteItemById,
   addItems,
 };
