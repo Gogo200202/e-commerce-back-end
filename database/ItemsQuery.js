@@ -3,6 +3,19 @@ const { Db } = require("./connectionDb");
 var ObjectID = require("mongodb").ObjectID;
 var mongo = require("mongodb");
 
+async function Get6ofMostLikedItems() {
+  let DbConnection = await Db;
+
+  const filter = {};
+  const sort = {
+    totalLikes: -1,
+  };
+  const limit = 6;
+
+  const Items = await DbConnection.Items.find(filter, { sort, limit }).toArray();
+
+  return Items;
+}
 async function GetAllItems() {
   let DbConnection = await Db;
 
@@ -25,17 +38,16 @@ async function getItemsByParams(body) {
   let DbConnection = await Db;
 
   const filter = {};
-  if (body.nameOfProduct != '') {
+  if (body.nameOfProduct != "") {
     filter.name = new RegExp(body.nameOfProduct, "i");
   }
-  if (body.itemCategory != '') {
+  if (body.itemCategory != "") {
     filter.category = body.itemCategory;
   }
-  if (body.itemLocation != '') {
+  if (body.itemLocation != "") {
     filter.location = body.itemLocation;
   }
 
-console.log(filter)  
   const Items = await DbConnection.Items.find(filter).toArray();
 
   return Items;
@@ -66,4 +78,5 @@ module.exports = {
   getItemsByParams,
   deleteItemById,
   addItems,
+  Get6ofMostLikedItems
 };

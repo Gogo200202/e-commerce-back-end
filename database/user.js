@@ -1,6 +1,6 @@
 const { Db } = require("./connectionDb");
 
-var ObjectID = require("mongodb").ObjectID;
+var ObjectID = require("mongodb").ObjectId;
 var mongo = require("mongodb");
 
 async function CreateUser(newUser) {
@@ -81,13 +81,16 @@ async function checkIfItemIsLikedByUser(userName, productId) {
     likedProducts: { $in: [productId] },
   }).count();
 
-
   return user;
 }
 
 async function deleteLikedProductIdFromUser(userName, productId) {
   let DbConnection = await Db;
 
+   let filter = { _id: new ObjectID(productId) };
+  await DbConnection.Items.updateOne(filter, {
+    $inc: { totalLikes: -1 },
+  });
   const user = await DbConnection.Users.updateOne(
     { userName: userName },
     { $pull: { likedProducts: productId } }
@@ -98,6 +101,10 @@ async function deleteLikedProductIdFromUser(userName, productId) {
 
 async function addProductLikesToUser(userName, productId) {
   let DbConnection = await Db;
+  let filter = { _id: new ObjectID(productId) };
+  await DbConnection.Items.updateOne(filter, {
+    $inc: { totalLikes: 1 },
+  });
 
   const user = await DbConnection.Users.updateOne(
     { userName: userName },
@@ -131,5 +138,5 @@ module.exports = {
   deleteLikedProductIdFromUser,
   checkIfItemBelowsToUser,
   checkIfItemIsLikedByUser,
-  getLikedProductsFromUser
+  getLikedProductsFromUser,
 };

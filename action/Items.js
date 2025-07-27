@@ -8,14 +8,15 @@ let multer = require("multer");
 
 const {
   GetAllItems,
+  Get6ofMostLikedItems,
   GetItemById,
   getItemsByParams,
 } = require("../database/ItemsQuery");
 const { addItems } = require("../database/ItemsQuery");
 const { addProductToUserPublished } = require("../database/user");
 
-router.get("/getAllItems", async function (req, res, next) {
-  let allItems = await GetAllItems();
+router.get("/getMostLikedItems", async function (req, res, next) {
+  let allItems = await Get6ofMostLikedItems();
 
   res.json({ Items: allItems });
 });
